@@ -142,7 +142,6 @@ public enum SignUtils implements SignType {
     };
 
 
-
     @Override
     public String getName() {
         return this.name();
@@ -198,10 +197,14 @@ public enum SignUtils implements SignType {
      * 初始化BC
      */
     public static void initBc() {
-        if (null == Security.getProvider("BC")) {
-            Security.removeProvider("SunEC");
-            Security.addProvider(new BouncyCastleProvider());
+        String javaVersion = System.getProperty("java.version");
+        if (javaVersion.contains("1.8") || javaVersion.startsWith("8")) {
+            if (null == Security.getProvider("BC")) {
+                Security.removeProvider("SunEC");
+                Security.addProvider(new BouncyCastleProvider());
+            }
         }
+
     }
 
 
