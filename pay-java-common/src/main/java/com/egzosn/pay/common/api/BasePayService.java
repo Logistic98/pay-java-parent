@@ -198,6 +198,17 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     }
 
     /**
+     * 小程序支付，返回小程序所需的订单构建信息
+     *
+     * @param order 发起支付的订单信息
+     * @return 返回支付结果
+     */
+    @Override
+    public <O extends PayOrder> Map<String, Object> jsApi(O order) {
+        return Collections.emptyMap();
+    }
+
+    /**
      * 将请求参数或者请求流转化为 Map
      *
      * @param parameterMap 请求参数

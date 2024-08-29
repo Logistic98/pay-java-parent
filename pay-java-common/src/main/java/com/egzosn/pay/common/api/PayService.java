@@ -186,6 +186,14 @@ public interface PayService<PC extends PayConfigStorage> {
     <O extends PayOrder> String getQrPay(O order);
 
     /**
+     * 小程序支付，返回小程序所需的订单构建信息
+     *
+     * @param order 发起支付的订单信息
+     * @param <O>   预订单类型
+     * @return 返回支付结果
+     */
+    <O extends PayOrder> Map<String, Object> jsApi(O order);
+    /**
      * 刷卡付,pos主动扫码付款(条码付)
      * 刷脸付
      *

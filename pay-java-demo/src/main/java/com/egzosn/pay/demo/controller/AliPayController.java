@@ -18,6 +18,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliRefundResult;
@@ -32,6 +33,7 @@ import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
+import com.egzosn.pay.common.util.MapGen;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.handler.AliPayMessageHandler;
@@ -184,6 +186,29 @@ public class AliPayController {
     /**
      * 刷卡付,pos主动扫码付款(条码付)
      *
+     * @param openid 授权码，条码等
+     * @param price    金额
+     * @return 支付结果
+     */
+    @RequestMapping(value = "minapp")
+    public Map<String, Object> minapp(BigDecimal price, String openid) {
+        //获取对应的支付账户操作工具（可根据账户id）
+        //条码付
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.BAR_CODE);
+        //声波付
+//        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAVE_CODE);
+        //设置授权码，条码等
+        order.setOpenid(openid);
+        order.addAttr("op_app_id", "小程序支付中，商户实际经营主体的小程序应用的appid，也即最终唤起收银台支付所在的小程序的应用id");
+        //预订单结果
+        Map<String, Object> params = service.jsApi(order);
+        //这里开发者自行处理
+        return params;
+    }
+
+    /**
+     * 刷卡付,pos主动扫码付款(条码付)
+     *
      * @param authCode 授权码，条码等
      * @param price    金额
      * @return 支付结果
@@ -209,6 +234,27 @@ public class AliPayController {
         }
         //这里开发者自行处理
         return params;
+    }
+    /**
+     * 刷卡付,pos主动扫码付款(条码付)
+     *
+     * @param openid 授权码，条码等
+     * @param price    金额
+     * @return 支付结果
+     */
+    @RequestMapping(value = "jsapi")
+    public Map<String, Object> jsapi(BigDecimal price, String openid) {
+        //获取对应的支付账户操作工具（可根据账户id）
+        //条码付
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.BAR_CODE);
+
+        order.setOpenid(openid);
+        //支付结果
+        Map<String, Object> orderInfo = service.orderInfo(order);
+        Map<String, Object> bizContent = new MapGen<>("biz_content", orderInfo.get("biz_content")).getAttr();
+        JSONObject result = service.getHttpRequestTemplate().postForObject(service.getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), bizContent, JSONObject.class);
+        //这里开发者自行处理
+        return result;
     }
 
     /**

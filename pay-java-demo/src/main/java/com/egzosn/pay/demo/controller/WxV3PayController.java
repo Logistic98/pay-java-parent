@@ -98,17 +98,18 @@ public class WxV3PayController {
     /**
      * 公众号支付
      *
+     *
      * @param openid openid
-     * @param price  金额
+     * @param price 金额
      * @return 返回jsapi所需参数
      */
-    @RequestMapping(value = "jsapi")
+    @RequestMapping(value = "jsapi" )
     public Map toPay(String openid, BigDecimal price) {
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.JSAPI);
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), com.egzosn.pay.wx.bean.WxTransactionType.JSAPI);
         order.setOpenid(openid);
 
-        Map orderInfo = service.orderInfo(order);
+        Map<String, Object> orderInfo = service.jsApi(order);
         orderInfo.put("code", 0);
 
         return orderInfo;

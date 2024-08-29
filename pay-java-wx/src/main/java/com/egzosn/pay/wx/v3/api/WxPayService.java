@@ -451,6 +451,20 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     }
 
     /**
+     * 小程序支付，返回小程序所需的订单构建信息
+     *
+     * @param order 发起支付的订单信息
+     * @return 返回支付结果
+     */
+    @Override
+    public Map<String, Object> jsApi(PayOrder order) {
+        if (null == order.getTransactionType()) {
+            order.setTransactionType(WxTransactionType.JSAPI);
+        }
+        return orderInfo(order);
+    }
+
+    /**
      * 刷卡付,pos主动扫码付款
      *
      * @param order 发起支付的订单信息

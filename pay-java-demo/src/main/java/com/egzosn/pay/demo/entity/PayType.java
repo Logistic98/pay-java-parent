@@ -8,7 +8,12 @@ import com.egzosn.pay.common.bean.BasePayType;
 import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.demo.service.handler.FuiouPayMessageHandler;
+import com.egzosn.pay.demo.service.handler.PayPalPayMessageHandler;
+import com.egzosn.pay.demo.service.handler.PayoneerMessageHandler;
+import com.egzosn.pay.demo.service.handler.UnionPayMessageHandler;
 import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
+import com.egzosn.pay.demo.service.handler.YouDianPayMessageHandler;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
@@ -64,7 +69,9 @@ public enum PayType implements BasePayType {
             aliPayConfigStorage.setInputCharset("utf-8");
             //是否为测试账号，沙箱环境
             aliPayConfigStorage.setTest(true);
-            return new AliPayService(aliPayConfigStorage);
+            AliPayService aliPayService = new AliPayService(aliPayConfigStorage);
+            aliPayService.setPayMessageHandler(new WxPayMessageHandler(apyAccount.getPayId()));
+            return aliPayService;
         }
 
         @Override
@@ -102,7 +109,7 @@ public enum PayType implements BasePayType {
             httpConfigStorage.setCertStoreType(CertStoreType.PATH);
             return  new WxPayService(wxPayConfigStorage, httpConfigStorage);*/
             WxPayService wxPayService = new WxPayService(wxPayConfigStorage);
-            wxPayService.setPayMessageHandler(new WxPayMessageHandler(1));
+            wxPayService.setPayMessageHandler(new WxPayMessageHandler(apyAccount.getPayId()));
             return wxPayService;
         }
 
@@ -131,7 +138,9 @@ public enum PayType implements BasePayType {
             wxPayConfigStorage.setSeller(apyAccount.getSeller());
             wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             wxPayConfigStorage.setTest(apyAccount.isTest());
-            return new WxYouDianPayService(wxPayConfigStorage);
+            final WxYouDianPayService wxYouDianPayService = new WxYouDianPayService(wxPayConfigStorage);
+            wxYouDianPayService.setPayMessageHandler(new YouDianPayMessageHandler(apyAccount.getPayId()));
+            return wxYouDianPayService;
         }
 
         /**
@@ -157,7 +166,9 @@ public enum PayType implements BasePayType {
             fuiouPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             fuiouPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             fuiouPayConfigStorage.setTest(apyAccount.isTest());
-            return new FuiouPayService(fuiouPayConfigStorage);
+            final FuiouPayService fuiouPayService = new FuiouPayService(fuiouPayConfigStorage);
+            fuiouPayService.setPayMessageHandler(new FuiouPayMessageHandler(apyAccount.getPayId()));
+            return fuiouPayService;
         }
 
         @Override
@@ -192,7 +203,9 @@ public enum PayType implements BasePayType {
             unionPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             unionPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             unionPayConfigStorage.setTest(apyAccount.isTest());
-            return new UnionPayService(unionPayConfigStorage);
+            final UnionPayService unionPayService = new UnionPayService(unionPayConfigStorage);
+            unionPayService.setPayMessageHandler(new UnionPayMessageHandler(apyAccount.getPayId()));
+            return unionPayService;
         }
 
         @Override
@@ -214,7 +227,9 @@ public enum PayType implements BasePayType {
             configStorage.setApiPassword(apyAccount.getPrivateKey());
             //是否为沙箱
             configStorage.setTest(true);
-            return new PayoneerPayService(configStorage);
+            final PayoneerPayService payoneerPayService = new PayoneerPayService(configStorage);
+            payoneerPayService.setPayMessageHandler(new PayoneerMessageHandler(apyAccount.getPayId()));
+            return payoneerPayService;
 
             //以下不建议进行使用，会引起两次请求的问题
             //Basic Auth
@@ -243,7 +258,9 @@ public enum PayType implements BasePayType {
             storage.setReturnUrl(apyAccount.getReturnUrl());
             //取消按钮转跳地址,这里兼容的做法
             storage.setNotifyUrl(apyAccount.getNotifyUrl());
-            return new PayPalPayService(storage);
+            final PayPalPayService payPalPayService = new PayPalPayService(storage);
+            payPalPayService.setPayMessageHandler(new PayPalPayMessageHandler(apyAccount.getPayId()));
+            return payPalPayService;
         }
 
         @Override

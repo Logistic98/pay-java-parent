@@ -52,9 +52,13 @@ public class PayResponse {
         //根据不同的账户类型 初始化支付配置
         this.service = apyAccount.getPayType().getPayService(apyAccount);
         this.storage = service.getPayConfigStorage();
+
+
         //这里设置http请求配置
 //        service.setRequestTemplateConfigStorage(getHttpConfigStorage());
         buildRouter(apyAccount.getPayId());
+
+
     }
 
     /**
@@ -87,7 +91,9 @@ public class PayResponse {
      * 配置路由
      *
      * @param payId 指定账户id，用户多微信支付多支付宝支付
+     * @deprecated 不再推荐使用路由方式，回调或拦截器，直接在payService中设置并获取使用
      */
+    @Deprecated
     private void buildRouter(Integer payId) {
         router = new PayMessageRouter(this.service);
         router

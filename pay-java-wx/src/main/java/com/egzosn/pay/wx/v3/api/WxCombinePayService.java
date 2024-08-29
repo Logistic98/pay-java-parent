@@ -105,6 +105,19 @@ public class WxCombinePayService extends WxPayService {
         return getAssistService().doExecute(parameters, order);
     }
 
+    /**
+     * 小程序支付，返回小程序所需的订单构建信息
+     *
+     * @param order 发起支付的订单信息
+     * @return 返回支付结果
+     */
+    @Override
+    public Map<String, Object> jsApi(PayOrder order) {
+        if (null == order.getTransactionType()) {
+            order.setTransactionType(WxTransactionType.COMBINE_JSAPI);
+        }
+        return super.jsApi(order);
+    }
 
     /**
      * 交易查询接口
@@ -117,6 +130,7 @@ public class WxCombinePayService extends WxPayService {
     public Map<String, Object> query(String transactionId, String outTradeNo) {
         return query(new AssistOrder(outTradeNo));
     }
+
     /**
      * 交易查询接口
      *

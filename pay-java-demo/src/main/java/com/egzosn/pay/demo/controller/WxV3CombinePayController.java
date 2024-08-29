@@ -126,7 +126,7 @@ public class WxV3CombinePayController {
         subOrder.setSubMchid("服务商必填----二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
         subOrders.add(subOrder);
         order.setSubOrders(subOrders);
-        Map orderInfo = service.orderInfo(order);
+        Map orderInfo = service.jsApi(order);
         orderInfo.put("code", 0);
         return orderInfo;
     }

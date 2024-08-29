@@ -64,9 +64,17 @@ public final class AliPayConst {
      * 业务扩展参数
      */
     public static final String EXTEND_PARAMS = "extend_params";
+    public static final String BUSINESS_PARAMS = "business_params";
+    public static final String DISCOUNTABLE_AMOUNT = "discountable_amount";
+    public static final String UNDISCOUNTABLE_AMOUNT = "undiscountable_amount";
+    public static final String STORE_ID = "store_id";
+    public static final String ENABLE_PAY_CHANNELS = "enable_pay_channels";
+    public static final String DISABLE_PAY_CHANNELS = "disable_pay_channels";
+    public static final String QUERY_OPTIONS = "query_options";
+    public static final String AGREEMENT_SIGN_PARAMS = "agreement_sign_params";
+    public static final String ALIPAY_STORE_ID = "alipay_store_id";
     public static final String BIZ_TYPE = "biz_type";
     public static final String REFUND_REASON = "refund_reason";
-    public static final String QUERY_OPTIONS = "query_options";
     public static final String OUT_REQUEST_NO = "out_request_no";
     /**
      *  	用户付款中途退出返回商户网站的地址

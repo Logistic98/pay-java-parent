@@ -165,7 +165,7 @@ public class PayController {
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType("JSAPI"));
         order.setOpenid(openid);
 
-        Map orderInfo = payResponse.getService().orderInfo(order);
+        Map<String, Object> orderInfo = payResponse.getService().jsApi(order);
         orderInfo.put("code", 0);
 
         return orderInfo;
@@ -211,9 +211,9 @@ public class PayController {
         Map<String, Object> params = payResponse.getService().microPay(order);
         PayConfigStorage storage = payResponse.getService().getPayConfigStorage();
         //校验
-        if (payResponse.getService().verify(params)) {
+        if (payResponse.getService().verify(new NoticeParams(params))) {
             PayMessage message = new PayMessage(params, storage.getPayType());
-            //支付校验通过后的处理
+            //支付校验通过后的处理,,路由的方式已经不建议使用了
             payResponse.getRouter().route(message);
         }
         //这里开发者自行处理

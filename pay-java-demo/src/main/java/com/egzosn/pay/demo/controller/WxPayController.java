@@ -124,7 +124,7 @@ public class WxPayController {
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.JSAPI);
         order.setOpenid(openid);
 
-        Map orderInfo = service.orderInfo(order);
+        Map<String, Object> orderInfo = service.jsApi(order);
         orderInfo.put("code", 0);
 
         return orderInfo;

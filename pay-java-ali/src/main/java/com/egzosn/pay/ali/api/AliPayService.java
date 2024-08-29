@@ -282,9 +282,10 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
                 bizContent.put(PRODUCT_CODE, "QUICK_MSECURITY_PAY");
                 break;
             case MINAPP:
-                bizContent.put("extend_params", order.getAddition());
+                bizContent.put(PASSBACK_PARAMS, order.getAddition());
+                bizContent.put("op_app_id", order.getAttrForString("op_app_id"));
                 bizContent.put("buyer_id", order.getOpenid());
-                bizContent.put(PRODUCT_CODE, "FACE_TO_FACE_PAYMENT");
+                bizContent.put(PRODUCT_CODE, "JSAPI_PAY");
                 break;
             case BAR_CODE:
             case WAVE_CODE:
@@ -299,14 +300,27 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
 
         setExpirationTime(bizContent, order);
 
-        bizContent.putAll(order.getAttrs());
+        loadAddition(bizContent, order);
         orderInfo.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         return preOrderHandler(orderInfo, order);
     }
 
-    private Map<String, Object> setExpirationTime(Map<String, Object> bizContent, PayOrder order) {
+    private void loadAddition(Map<String, Object> bizContent, PayOrder order) {
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.EXTEND_PARAMS, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.BUSINESS_PARAMS, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.DISCOUNTABLE_AMOUNT, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.UNDISCOUNTABLE_AMOUNT, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.STORE_ID, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.ALIPAY_STORE_ID, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.ENABLE_PAY_CHANNELS, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.DISABLE_PAY_CHANNELS, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.QUERY_OPTIONS, order);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.AGREEMENT_SIGN_PARAMS, order);
+    }
+
+    private void setExpirationTime(Map<String, Object> bizContent, PayOrder order) {
         if (null == order.getExpirationTime()) {
-            return bizContent;
+            return;
         }
         bizContent.put("timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         switch ((AliTransactionType) order.getTransactionType()) {
@@ -316,11 +330,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
             case PAGE:
             case WAP:
             case APP:
+            case MINAPP:
                 bizContent.put("time_expire", DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYY_MM_DD_HH_MM_SS));
                 break;
             default:
         }
-        return bizContent;
     }
 
     /**
@@ -442,6 +456,31 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
     }
 
     /**
+     * 小程序支付，返回小程序所需的订单构建信息
+     *
+     * @param order 发起支付的订单信息
+     * @return 返回支付结果
+     */
+    @Override
+    public Map<String, Object> jsApi(PayOrder order) {
+        if (null == order.getTransactionType()) {
+            order.setTransactionType(AliTransactionType.MINAPP);
+        }
+        Map<String, Object> orderInfo = orderInfo(order);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put(BIZ_CONTENT, orderInfo.remove(BIZ_CONTENT));
+        OrderParaStructure.loadParameters(body, APP_AUTH_TOKEN, (String) orderInfo.remove(APP_AUTH_TOKEN));
+        //预订单
+        JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), body, JSONObject.class);
+        JSONObject response = result.getJSONObject("alipay_trade_create_response");
+        if (!SUCCESS_CODE.equals(response.getString(CODE))) {
+            LOG.warn("下单失败:{}", response);
+        }
+
+        return response;
+    }
+
+    /**
      * pos主动扫码付款(条码付)
      *
      * @param order 发起支付的订单信息
@@ -461,7 +500,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
         JSONObject response = result.getJSONObject("alipay_trade_pay_response");
         if (!SUCCESS_CODE.equals(response.getString(CODE))) {
-            LOG.info("收款失败");
+            LOG.info("收款失败{}", response);
         }
         return result;
     }
