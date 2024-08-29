@@ -4,6 +4,7 @@ import javax.annotation.Resource;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
+import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayMessageHandler;
 import com.egzosn.pay.common.api.PayMessageRouter;
@@ -91,7 +92,7 @@ public class PayResponse {
      * 配置路由
      *
      * @param payId 指定账户id，用户多微信支付多支付宝支付
-     * @deprecated 不再推荐使用路由方式，回调或拦截器，直接在payService中设置并获取使用
+     * @deprecated 不再推荐使用路由方式，回调或拦截器，直接在payService中设置并获取使用,回调拦截器已提供对应的实现方式：{@link BasePayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)} 与{@link BasePayService#addPayMessageInterceptor(com.egzosn.pay.common.api.PayMessageInterceptor)}
      */
     @Deprecated
     private void buildRouter(Integer payId) {
@@ -148,6 +149,12 @@ public class PayResponse {
         return service;
     }
 
+    /**
+     * 不建议使用， 回调拦截器已提供对应的实现方式：{@link BasePayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)} 与{@link BasePayService#addPayMessageInterceptor(com.egzosn.pay.common.api.PayMessageInterceptor)}
+     *
+     * @return
+     */
+    @Deprecated
     public PayMessageRouter getRouter() {
         return router;
     }

@@ -213,7 +213,7 @@ public class PayController {
         //校验
         if (payResponse.getService().verify(new NoticeParams(params))) {
             PayMessage message = new PayMessage(params, storage.getPayType());
-            //支付校验通过后的处理,,路由的方式已经不建议使用了
+            //支付校验通过后的处理,,路由的方式已经不建议使用了，
             payResponse.getRouter().route(message);
         }
         //这里开发者自行处理
