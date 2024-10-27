@@ -52,7 +52,7 @@ public final class AntCertificationUtil {
 
     static {
         String javaVersion = System.getProperty("java.version");
-        if (javaVersion.contains("1.8") || javaVersion.startsWith("8")){
+        if (javaVersion.contains("1.8") || javaVersion.startsWith("8")) {
             Security.setProperty("crypto.policy", "unlimited");
         }
         SignUtils.initBc();
@@ -170,9 +170,20 @@ public final class AntCertificationUtil {
      * @return 加密后的内容
      */
     public static String encryptToString(String message, Certificate certificate) {
+        return encryptToString(message, certificate.getPublicKey());
+    }
+
+    /**
+     * 对请求敏感字段进行加密
+     *
+     * @param message   the message
+     * @param publicKey the certificate
+     * @return 加密后的内容
+     */
+    public static String encryptToString(String message, PublicKey publicKey) {
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding", WxConst.BC_PROVIDER);
-            cipher.init(Cipher.ENCRYPT_MODE, certificate.getPublicKey());
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
             byte[] data = message.getBytes(StandardCharsets.UTF_8);
             byte[] cipherData = cipher.doFinal(data);

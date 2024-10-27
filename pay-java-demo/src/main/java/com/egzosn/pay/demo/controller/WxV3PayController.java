@@ -56,14 +56,16 @@ public class WxV3PayController {
         wxPayConfigStorage.setMchId("1602947765");
         //V3密钥 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
         wxPayConfigStorage.setV3ApiKey("9bd8f0e7af4841299d782406b7774f57");
+        //验签、转账等接口使用，9月份开始不允许获取证书方式了，直接通过公钥字符来做，
+        wxPayConfigStorage.setKeyPublic("支付平台公钥(原为自动获取的证书)");
         wxPayConfigStorage.setNotifyUrl("http://sailinmu.iok.la/wxV3/payBack.json");
         wxPayConfigStorage.setReturnUrl("http://sailinmu.iok.la/wxV3/payBack.json");
         wxPayConfigStorage.setInputCharset("utf-8");
         //使用证书时设置为true
 //        wxPayConfigStorage.setCertSign(true);
         //商户API证书 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
-        wxPayConfigStorage.setApiClientKeyP12("yifenli_mall.p12");
-        wxPayConfigStorage.setCertStoreType(CertStoreType.PATH);
+        wxPayConfigStorage.setApiClientKeyP12("http://pay.egzosn.com/yifenli_mall.p12");
+        wxPayConfigStorage.setCertStoreType(CertStoreType.URL);
         service = new WxPayService(wxPayConfigStorage);
         //微信海外支付：东南亚
 //        service.setApiServerUrl("https://apihk.mch.weixin.qq.com");

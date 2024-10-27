@@ -2,7 +2,9 @@ package com.egzosn.pay.wx.v3.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +53,7 @@ import com.egzosn.pay.common.util.MapGen;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignTextUtils;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
@@ -130,8 +133,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         if (null == assistService) {
             assistService = new DefaultWxPayAssistService(this);
         }
-        //在这预先进行初始化
-        assistService.refreshCertificate();
+        if (StringUtils.isEmpty(payConfigStorage.getKeyPublic())) {
+            //在这预先进行初始化
+            assistService.refreshCertificate();
+        }
         return assistService;
     }
 
@@ -222,14 +227,15 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         //微信平台签名
         String signature = noticeParams.getHeader("wechatpay-signature");
 
-        Certificate certificate = getAssistService().getCertificate(serial);
-
 
         //这里为微信回调时的请求内容体，原值数据
         String body = noticeParams.getBodyStr();
         //签名信息
         String signText = StringUtils.joining("\n", timestamp, nonce, body);
-
+        if (StringUtils.isNotEmpty(payConfigStorage.getKeyPublic())) {
+            return RSA2.verify(signText, signature, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
+        }
+        Certificate certificate = getAssistService().getCertificate(serial);
         return RSA2.verify(signText, signature, certificate, payConfigStorage.getInputCharset());
     }
 
@@ -685,19 +691,32 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             return null;
         }
 
-        // 商户上送敏感信息时使用`微信支付平台公钥`加密
-        String serialNumber = payConfigStorage.getCertEnvironment().getPlatformSerialNumber();
-        Certificate certificate = getAssistService().getCertificate(serialNumber);
+        PublicKey publicKeyTmp = null;
+        if (StringUtils.isEmpty(payConfigStorage.getKeyPublic())) {
+            // 商户上送敏感信息时使用`微信支付平台公钥`加密
+            String serialNumber = payConfigStorage.getCertEnvironment().getPlatformSerialNumber();
+            Certificate certificate = getAssistService().getCertificate(serialNumber);
+            publicKeyTmp = certificate.getPublicKey();
+        }
+        else {
+            try {
+                publicKeyTmp = RSA.getPublicKey(payConfigStorage.getKeyPublic());
+            }
+            catch (IOException | GeneralSecurityException e) {
+                throw new PayErrorException(new WxPayError("", e.getMessage()));
+            }
+        }
+        PublicKey publicKey = publicKeyTmp;
         return transferDetails.stream()
                 .peek(transferDetailListItem -> {
                     String userName = transferDetailListItem.getUserName();
                     if (StringUtils.isNotEmpty(userName)) {
-                        String encryptedUserName = AntCertificationUtil.encryptToString(userName, certificate);
+                        String encryptedUserName = AntCertificationUtil.encryptToString(userName, publicKey);
                         transferDetailListItem.setUserName(encryptedUserName);
                     }
                     String userIdCard = transferDetailListItem.getUserIdCard();
                     if (StringUtils.isNotEmpty(userIdCard)) {
-                        String encryptedUserIdCard = AntCertificationUtil.encryptToString(userIdCard, certificate);
+                        String encryptedUserIdCard = AntCertificationUtil.encryptToString(userIdCard, publicKey);
                         transferDetailListItem.setUserIdCard(encryptedUserIdCard);
                     }
                 }).collect(Collectors.toList());

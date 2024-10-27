@@ -41,7 +41,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
     /**
      * 字符类型
      */
-    private String inputCharset;
+    private String inputCharset = "utf-8";
 
 
     /**
