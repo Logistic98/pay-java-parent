@@ -23,6 +23,10 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
     private String keyPrivate;
 
     /**
+     * 支付平台公钥Id(签名校验使用)
+     */
+    private String keyPublicId;
+    /**
      * 支付平台公钥(签名校验使用)
      */
     private String keyPublic;
@@ -95,6 +99,14 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
         this.keyPrivate = keyPrivate;
     }
 
+    @Override
+    public String getKeyPublicId() {
+        return keyPublicId;
+    }
+
+    public void setKeyPublicId(String keyPublicId) {
+        this.keyPublicId = keyPublicId;
+    }
 
     @Override
     public String getKeyPublic() {

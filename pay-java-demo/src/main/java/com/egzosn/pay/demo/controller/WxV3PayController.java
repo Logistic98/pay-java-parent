@@ -58,6 +58,7 @@ public class WxV3PayController {
         wxPayConfigStorage.setV3ApiKey("9bd8f0e7af4841299d782406b7774f57");
         //验签、转账等接口使用，9月份开始不允许获取证书方式了，直接通过公钥字符来做，
         wxPayConfigStorage.setKeyPublic("支付平台公钥(原为自动获取的证书)");
+        wxPayConfigStorage.setKeyPublicId("支付平台公钥ID");
         wxPayConfigStorage.setNotifyUrl("http://sailinmu.iok.la/wxV3/payBack.json");
         wxPayConfigStorage.setReturnUrl("http://sailinmu.iok.la/wxV3/payBack.json");
         wxPayConfigStorage.setInputCharset("utf-8");

@@ -89,6 +89,13 @@ public interface PayConfigStorage extends Attrs {
     String getInputCharset();
 
     /**
+     * 支付平台公钥ID(签名校验使用)
+     *
+     * @return 公钥
+     */
+    String getKeyPublicId();
+
+    /**
      * 支付平台公钥(签名校验使用)
      *
      * @return 公钥
