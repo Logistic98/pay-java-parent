@@ -350,7 +350,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     @Override
     public HttpStringEntity hookHttpEntity(HttpStringEntity entity) {
-        if (StringUtils.isNotEmpty(payConfigStorage.getKeyPublic())) {
+        if (StringUtils.isNotEmpty(payConfigStorage.getKeyPublicId())) {
             // 商户上送敏感信息时使用`微信支付平台公钥`加密
             entity.addHeader(new BasicHeader(WxConst.WECHATPAY_SERIAL, payConfigStorage.getKeyPublicId()));
         }
